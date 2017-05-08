@@ -21,20 +21,19 @@ class ExportEmployee(models.TransientModel):
         if self.employee_id:
             contacts = self.env['hr.employee'].search([('id', '=', self.employee_id.id)], limit=1)
             with contextlib.closing(cStringIO.StringIO()) as buf:
-                x = "BEGIN VCARD"
-                writer = csv.writer(buf)
-                writer.writerow((x.encode('utf8'), ""))
-                writer.writerow(("VERSION:3.0", ""))
+                writer = csv.writer(buf, delimiter=":", quotechar='"')
+                writer.writerow(("BEGIN", "VCARD"))
+                writer.writerow(("VERSION", "3.0"))
                 for item in contacts:
-                    writer.writerow(("FULL NAME:", item.name.encode('utf8') if item.name else ''))
-                    writer.writerow(("ORG:", item.parent_id.name.encode('utf8') if item.parent_id.name else ''))
-                    writer.writerow(("TITLE:", item.job_id.name.encode('utf8') if item.job_id.name else ''))
-                    writer.writerow(("TEL;TYPE=WORK,VOICE:", item.work_phone if item.work_phone else ''))
-                    writer.writerow(("TEL;TYPE=HOME,VOICE:", item.mobile_phone if item.mobile_phone else ''))
-                    writer.writerow(("ADR;TYPE=HOME:", item.address_home_id.name.encode('utf8') if item.address_home_id.name else ''))
-                    writer.writerow(("EMAIL:", item.work_email if item.work_email else ''))
+                    writer.writerow(("FULLNAME", item.name.encode('utf8') if item.name else ''))
+                    writer.writerow(("ORG", item.parent_id.name.encode('utf8') if item.parent_id.name else ''))
+                    writer.writerow(("TITLE", item.job_id.name.encode('utf8') if item.job_id.name else ''))
+                    writer.writerow(("TEL;TYPE=WORK,VOICE", item.work_phone if item.work_phone else ''))
+                    writer.writerow(("TEL;TYPE=HOME,VOICE", item.mobile_phone if item.mobile_phone else ''))
+                    writer.writerow(("ADR;TYPE=HOME", item.address_home_id.name.encode('utf8') if item.address_home_id.name else ''))
+                    writer.writerow(("EMAIL", item.work_email if item.work_email else ''))
 
-                writer.writerow(("END:", "VCARD"))
+                writer.writerow(("END", "VCARD"))
                 out = base64.encodestring(buf.getvalue())
             self.write({
                 'state': 'get',
